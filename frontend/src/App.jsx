@@ -3,9 +3,11 @@ import Favorites from "./pages/Favorites"
 import Home from "./pages/Home"
 import { Routes, Route } from "react-router-dom";
 import NavBar  from "./components/NavBar";
+import { MovieProvider } from "./contexts/MovieContext";
 
 function App() {
   return (
+  <MovieProvider>
     <div>
       <NavBar/>
   
@@ -16,6 +18,7 @@ function App() {
       </Routes>
      </main>
     </div>
+   </MovieProvider>
   );
 }
 

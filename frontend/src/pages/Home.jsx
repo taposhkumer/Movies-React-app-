@@ -1,16 +1,48 @@
 import MovieCard from "../components/MovieCard";
-import { useState } from "react";
+import { useState,useEffect } from "react";
 import "../css/Home.css"
+import { searchMovies,getpopularMovies } from "../services/api";
 function Home() {
   const [searchQuery, setSearchQuery] = useState("");
-  const movies = [
-    { id: 1, title: "taposh", release_date: "2024" },
-    { id: 2, title: "puja", release_date: "2024" },
-    { id: 3, title: "tarit", release_date: "2024" },
-  ];
 
-  const handleSearch = (e) => {
+  const [error,setError] = useState(null);
+  const [movies,setMovies]=useState([]);
+  const [loading , setLoading]= useState(true)
+  useEffect(()=>{
+    const loadpopularMovies = async ()=>{
+      try {
+        const popularMovies = await getpopularMovies()
+        setMovies(popularMovies)
+      }catch (err){
+        console.log(err)
+        setError("Failed to load movies ..")
+      }
+      finally{
+        setLoading(false)
+      }
+    }
+
+    loadpopularMovies()
+  },[])
+
+  const handleSearch = async (e) => {
     e.preventDefault();
+    if(!searchQuery.trim())return
+    if(loading)return
+    setLoading(true)
+    try {
+      const searchResults = await searchMovies(searchQuery)
+      setMovies(searchResults)
+      setError(null)
+
+    }catch(err){
+       console.log(err)
+      setError("failed to search movies ...")
+    }
+    finally{
+       setLoading(false)
+    }
+    
   };
 
   return (
@@ -25,7 +57,11 @@ function Home() {
         />
         <button type="submit" className="search-button">Search</button>
       </form>
-      <div className="movies-grid">
+
+      {error && <div className="error-message">{error}</div>}
+
+      {loading ? (<div className="loading">loading..</div>):
+      (<div className="movies-grid">
         {movies
           .filter((movie) =>
             movie.title.toLowerCase().startsWith(searchQuery.toLowerCase())
@@ -33,7 +69,7 @@ function Home() {
           .map((movie) => (
             <MovieCard movie={movie} key={movie.id} />
           ))}
-      </div>
+      </div>)}
     </div>
   );
 }
